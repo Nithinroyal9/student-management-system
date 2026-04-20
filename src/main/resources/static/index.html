@@ -15,8 +15,6 @@
         .btn-delete { background-color: #dc3545; border: none; color: white; font-weight: 600; }
         .form-label { font-weight: 600; color: #495057; }
         .search-group { box-shadow: 0 2px 5px rgba(0,0,0,0.05); border-radius: 8px; overflow: hidden; }
-
-        /* Message Alert Styling */
         #inlineMessage { font-weight: 600; border-radius: 8px; transition: all 0.3s ease; }
     </style>
 </head>
@@ -90,25 +88,18 @@
     let isEditMode = false;
     let editId = null;
 
-    // --- ALERT FUNCTION (Now Inline under button) ---
     function showAlert(message, typeClass) {
         const msgDiv = document.getElementById('inlineMessage');
         msgDiv.innerText = message;
         msgDiv.className = `mt-3 text-center alert ${typeClass}`;
         msgDiv.classList.remove('d-none');
-
-        // Hide after 4 seconds automatically
-        setTimeout(() => {
-            msgDiv.classList.add('d-none');
-        }, 4000);
+        setTimeout(() => { msgDiv.classList.add('d-none'); }, 4000);
     }
 
-    // --- MAIN ACTION (ADD/UPDATE) ---
     async function handleAction() {
         const name = document.getElementById('name').value.trim();
         const dept = document.getElementById('dept').value.trim();
 
-        // Validation Logic
         if (name.length < 2) {
             showAlert("⚠️ Name must be at least 2 characters!", "alert-warning text-dark");
             return;
@@ -118,7 +109,8 @@
             return;
         }
 
-        const url = isEditMode ? `http://localhost:8080/students/${editId}` : 'http://localhost:8080/students';
+        // Relative URL for Cloud Deployment
+        const url = isEditMode ? `/students/${editId}` : '/students';
         const method = isEditMode ? 'PUT' : 'POST';
 
         try {
@@ -140,10 +132,9 @@
         }
     }
 
-    // --- FETCH DATA ---
     async function showStudents() {
         try {
-            const response = await fetch('http://localhost:8080/students');
+            const response = await fetch('/students');
             const students = await response.json();
             renderTable(students);
         } catch (e) {
@@ -151,11 +142,10 @@
         }
     }
 
-    // --- SEARCH LOGIC ---
     async function searchByName() {
         const q = document.getElementById('searchInput').value;
         if (q === "") return showStudents();
-        const response = await fetch(`http://localhost:8080/students/search?name=${q}`);
+        const response = await fetch(`/students/search?name=${q}`);
         renderTable(await response.json());
     }
 
@@ -164,7 +154,6 @@
         showStudents();
     }
 
-    // --- RENDER TABLE ---
     function renderTable(students) {
         const tbody = document.getElementById('studentTableBody');
         tbody.innerHTML = "";
@@ -182,10 +171,9 @@
         });
     }
 
-    // --- DELETE ---
     async function deleteStudent(id) {
         if (confirm("Delete this student from the database?")) {
-            const response = await fetch(`http://localhost:8080/students/${id}`, { method: 'DELETE' });
+            const response = await fetch(`/students/${id}`, { method: 'DELETE' });
             if (response.ok) {
                 showAlert("🗑️ Student Deleted!", "alert-danger");
                 showStudents();
@@ -193,7 +181,6 @@
         }
     }
 
-    // --- EDIT MODE ---
     function prepareUpdate(id, name, dept) {
         document.getElementById('name').value = name;
         document.getElementById('dept').value = dept;
@@ -206,8 +193,6 @@
         document.getElementById('cancelBtn').style.display = "block";
         isEditMode = true;
         editId = id;
-
-        // Scroll to top of form smoothly
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
@@ -215,11 +200,9 @@
         document.getElementById('name').value = '';
         document.getElementById('dept').value = '';
         document.getElementById('formTitle').innerText = "Add Student";
-
         const btn = document.getElementById('submitBtn');
         btn.innerText = "Add to Database";
         btn.className = "btn btn-success btn-lg w-100 fw-bold shadow-sm";
-
         document.getElementById('cancelBtn').style.display = "none";
         isEditMode = false;
         editId = null;
